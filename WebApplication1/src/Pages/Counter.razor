@@ -1,0 +1,385 @@
+﻿@page "/"
+@using System.Timers;
+
+@if (debug)
+{
+    <p style="color: white">
+        Current count: @counter::: half:@half :: ten:@ten :: PhaseName:@phaseName
+        <br> RoundTime:@roundTime ::: @roundMinutes:@roundSeconds :: PhaseTime:@phaseTime
+        <br> NumberOfRounds:@NumberOfRounds :: RoundNumber:@(roundNumber + 1) :: PhaseNumber: @(phaseNumber + 1)
+    </p>
+}
+
+@if (showRemaining)
+{
+    <div class="time-to" style="display: flex; justify-content: space-between;">
+        <span style="font-size: 32px">Round @(roundNumber + 1)</span>
+        <span class="time" style="font-size: 20px;">
+            
+            @if (roundSeconds < 10)
+            {
+               <span>Overall Time @roundMinutes:0@(roundSeconds)</span>
+            }
+            else
+            {
+                <span>Overall Time @roundMinutes:@roundSeconds</span>
+            }
+
+        </span>
+    </div>
+}
+
+@if (@showRemaining)
+{
+<div class="time-to" style="font-size: 50px; background-color: @bkgColor; min-width: 650px;">
+
+    <div style="color: @txtColor;">
+        <div>Time Remaining in</div>
+        <div><strong style="font-size: 75px;"> @phaseName </strong></div>
+    </div>
+    <div class="time" style="font-size:200px; letter-spacing:2px; color:@txtColor"> 
+    @if (seconds < 10)
+    {
+        <span>@minutes:0@(seconds)</span>
+    }
+    else
+    {
+        <span>@minutes:@seconds</span>
+    }
+    </div>
+</div>
+    @if (peekPhaseName != string.Empty)
+     {
+         <div class="time-to">
+             <span style="font-size: 18px;">Up Next: Round @(roundNumber + 1)</span>
+             <span style="font-size: 25px;">@peekPhaseName</span>
+         </div>
+     }
+    else
+    {
+        @if (gameOn)
+        {
+            <div class="time-to">
+                <span style="font-size: 18px;">Up Next: Round @(roundNumber + 2)</span>
+            </div>
+        }
+        else
+        {
+            <div class="time-to">
+                <span style="font-size: 25px;">Game End</span>
+            </div>
+        }
+    }
+}
+
+@if (!@showRemaining)
+{
+    <div class="time-to" style="font-size: 200px;">Watch The Skies</div>
+    <div class="time-to" @onkeyup="OnEnterKey">
+    <span><button class="btn btn-primary button" @onclick="DoWork">Start Game</button></span>
+    <span>
+        Number of Rounds: <input type="text" @bind="NumberOfRounds" /><br />
+    </span>
+    </div>
+
+    
+}
+@if(showRemaining){
+    <div class="time-to" style="display: flex; justify-content: space-between;">
+    
+    @if(!isPaused)
+    {
+        <span><button class="btn btn-primary button" @onclick="PauseWork">Pause</button></span>
+    }
+    else
+    {
+        <span><button class="btn btn-primary button" @onclick="ResumeWork">Resume</button></span>
+        <span class="time">
+            @if (stopwatchSeconds < 10)
+            {
+                <span>@stopwatchMinutes:0@(stopwatchSeconds)</span>
+            }
+            else
+            {
+                <span>@stopwatchMinutes:@stopwatchSeconds</span>
+            }
+        </span>
+    }
+    </div>
+}
+
+@code {
+    private int NumberOfRounds { get; set; }
+    //static int interval = 0;//70;
+    int initial = 0;
+    int roundTime = 0;
+    int phaseTime = 0;
+    int roundNumber = 0;
+    int phaseNumber = -1;
+
+    string phaseName = string.Empty;
+
+    Timer timer;
+    Timer stopwatch;
+    public int counter { get; set; } = -1;
+    int stopwatchCount = 0;
+    int stopwatchMinutes = 0;
+    int stopwatchSeconds = 0;
+    bool isPaused = false;
+    bool gameOn = false;
+
+    int minutes = 0;
+    int seconds = 0;
+    
+    int roundMinutes = 0;
+    int roundSeconds = 0;
+
+
+    bool showRemaining = false;
+    string bkgColor = string.Empty;
+    string txtColor = string.Empty;
+    string peekPhaseName = string.Empty;
+
+    int half = 0;
+    int ten = 0;
+    bool debug = false;
+
+    Game game;
+
+    void DoWork()
+    {
+        game = new Game(NumberOfRounds);
+
+        //counter = 70;
+        //TimerStart(counter);
+
+        counter = -1;
+        roundNumber = 0;
+        phaseNumber = -1;
+        //TimerStart(counter);
+
+        if (timer == null)
+            timer = new Timer();
+
+        timer.Interval = 1000;
+        timer.Elapsed += TimerOnElapsed;
+        
+        System.Console.WriteLine(gameOn);
+        
+        CalculateRound();
+    }
+
+    void PauseWork()
+    {
+        timer.Stop();
+        
+        
+        //stopwatch
+        stopwatch = new Timer();
+        stopwatch.Interval = 1000;
+        stopwatch.Elapsed += StopwatchOnElapsed;
+        stopwatch.Enabled = true;
+
+        isPaused = true;
+        StateHasChanged();
+
+    }
+
+    void ResumeWork()
+    {
+        stopwatch.Dispose();
+        stopwatchCount = 0;
+        stopwatchMinutes = stopwatchSeconds = 0;
+        isPaused = false;
+        StateHasChanged();
+        
+        timer.Start();
+    }
+
+    private void OnEnterKey( KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter" )        // fire on enter 
+        {
+            DoWork();
+        }        
+    }
+
+    private void StopwatchOnElapsed(object sender, ElapsedEventArgs e)
+    {
+        stopwatchCount++;
+        
+        stopwatchMinutes = stopwatchCount / 60;
+        stopwatchSeconds = stopwatchCount % 60;
+        
+        StateHasChanged();
+    }
+
+    void TimerStart(int interval)
+    {
+        System.Console.WriteLine($"Begin TimeStart Process");
+        initial = interval;
+        minutes = interval / 60;
+        seconds = interval % 60;
+
+        roundMinutes = roundTime / 60;
+        roundSeconds = roundTime % 60;
+
+        timer.Enabled = true;
+        timer.Start();
+
+        showRemaining = true;
+    }
+
+    private void TimerOnElapsed(object sender, ElapsedEventArgs e)
+    {
+        CalculateRound();
+        UpdateUI();
+    }
+
+    private void CalculateRound()
+    {
+        if (counter <= 0)
+        {
+            System.Console.WriteLine($"CalculateRound Start");
+
+            if (roundNumber < game.Rounds.Count)
+            {
+                gameOn = roundNumber + 1 < game.Rounds.Count;
+                
+                var round = game.Rounds[roundNumber];
+
+                if (roundTime <= 0)
+                {
+                    System.Console.WriteLine($"RoundTime Set");
+                    roundTime = round.Phases.Sum(p => p.Value);
+                }
+
+                if (++phaseNumber < round.Phases.Count)
+                {
+                    System.Console.WriteLine($"Round: {roundNumber + 1} Phase Start: {phaseNumber + 1}");
+                    phaseName = round.Phases.ElementAt(phaseNumber).Key;
+                    phaseTime = round.Phases.ElementAt(phaseNumber).Value;
+                    counter = phaseTime;
+                    TimerStart(counter);
+                    
+                    peekPhaseName = phaseNumber + 1 < round.Phases.Count ?
+                        round.Phases.ElementAt(phaseNumber + 1).Key : string.Empty;
+                    StateHasChanged();
+
+                }
+                else
+                {
+                    System.Console.WriteLine($"Round Number Change");
+                    roundNumber++;
+                    phaseNumber = -1;
+                    System.Console.WriteLine(gameOn);
+                    CalculateRound();
+                    
+                    
+                }
+            }
+            else
+            {
+                gameOn = false;
+                System.Console.WriteLine(gameOn);
+                if (timer != null)
+                {
+                    timer.Enabled = false;
+                    Dispose();
+                }
+            }
+        }
+    }
+
+    private void UpdateUI()
+    {
+        timer.Stop();
+        if (counter >= 0)
+        {
+            minutes = counter / 60;
+            seconds = counter % 60;
+
+            roundMinutes = roundTime / 60;
+            roundSeconds = roundTime % 60;
+
+            half = (int)(initial * .5);
+            ten = (int)(initial * .1);
+
+            if (counter >= half)
+            {
+                bkgColor = "green";
+                txtColor = "white";
+            }
+            if (counter < half && counter >= ten)
+            {
+                bkgColor = "yellow";
+                txtColor = "black";
+            }
+            if (counter < ten)
+            {
+                bkgColor = "red";
+                txtColor = "white";
+            }
+
+            counter--;
+            roundTime--;
+            StateHasChanged();
+        }
+        timer.Start();
+    }
+
+    public void Dispose()
+    {
+        if (timer != null)
+        {
+            //timer.Dispose();
+            timer.Stop();
+            timer = null;
+        }
+        roundNumber = 0;
+        showRemaining = false;
+        StateHasChanged();
+    }
+
+    //public class Phase
+    //{
+    //    public string Name { get; set; }
+    //    public int Length { get; set; }
+    //}
+
+    public class Round
+    {
+        public Dictionary<string, int> Phases { get; set; } = new Dictionary<string, int>();
+
+        public Round()
+        {
+            Phases.Add("Team", 600); //600
+            Phases.Add("Action", 900); //900
+            Phases.Add("Diplomacy", 600); //600
+            Phases.Add("Cleanup", 300); //300
+        }
+    }
+
+    public class Game
+    {
+        //public int NumOfRounds { get; set; }
+        public List<Round> Rounds { get; } = new List<Round>();
+
+        public Game(int numOfRounds)
+        {
+            System.Console.WriteLine($"numOfRounds: {numOfRounds}");
+            for (int i = 0; i < numOfRounds; i++)
+            {
+                var round = new Round();
+                Rounds.Add(round);
+            }
+            System.Console.WriteLine($"Ctor Rounds.Count: {Rounds.Count}");
+        }
+    }
+
+    //public enum PhaseName
+    //{
+    //    Team, Action, Diplomacy, Cleanup
+    //}
+
+}
