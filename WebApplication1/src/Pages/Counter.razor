@@ -13,7 +13,7 @@
 @if (showRemaining)
 {
     <div class="time-to" style="display: flex; justify-content: space-between;">
-        <span style="font-size: 32px">Round @(roundNumber + 1)</span>
+        <span style="font-size: 32px">Turn @(roundNumber + 1)</span>
         <span class="time" style="font-size: 20px;">
             
             @if (roundSeconds < 10)
@@ -51,7 +51,7 @@
     @if (peekPhaseName != string.Empty)
      {
          <div class="time-to">
-             <span style="font-size: 18px;">Up Next: Round @(roundNumber + 1)</span>
+             <span style="font-size: 18px;">Up Next: Turn @(roundNumber + 1)</span>
              <span style="font-size: 25px;">@peekPhaseName</span>
          </div>
      }
@@ -60,7 +60,7 @@
         @if (gameOn)
         {
             <div class="time-to">
-                <span style="font-size: 18px;">Up Next: Round @(roundNumber + 2)</span>
+                <span style="font-size: 18px;">Up Next: Turn @(roundNumber + 2)</span>
             </div>
         }
         else
@@ -74,11 +74,11 @@
 
 @if (!@showRemaining)
 {
-    <div class="time-to" style="font-size: 200px;">Watch The Skies</div>
+    <div class="time-to" style="font-size: 200px;">Watch The<br>Skies</div>
     <div class="time-to" @onkeyup="OnEnterKey">
     <span><button class="btn btn-primary button" @onclick="DoWork">Start Game</button></span>
     <span>
-        Number of Rounds: <input type="text" @bind="NumberOfRounds" /><br />
+        Number of Turns: <input type="password" @bind="NumberOfRounds" /><br />
     </span>
     </div>
 
@@ -109,7 +109,7 @@
 }
 
 @code {
-    private int NumberOfRounds { get; set; }
+    private int? NumberOfRounds { get; set; }
     //static int interval = 0;//70;
     int initial = 0;
     int roundTime = 0;
@@ -148,7 +148,7 @@
 
     void DoWork()
     {
-        game = new Game(NumberOfRounds);
+        game = new Game(NumberOfRounds.HasValue ? NumberOfRounds.Value : 0);
 
         //counter = 70;
         //TimerStart(counter);
@@ -269,7 +269,7 @@
                 }
                 else
                 {
-                    System.Console.WriteLine($"Round Number Change");
+                    System.Console.WriteLine($"Turn Number Change");
                     roundNumber++;
                     phaseNumber = -1;
                     System.Console.WriteLine(gameOn);
