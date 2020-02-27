@@ -12,6 +12,7 @@
 
 @if (showRemaining)
 {
+    <span style="color: black" @onclick="ToggleDebug">debug</span>
     <div class="time-to" style="display: flex; justify-content: space-between;">
         <span style="font-size: 32px">Turn @(roundNumber + 1)</span>
         <span class="time" style="font-size: 20px;">
@@ -130,7 +131,7 @@
 
     int minutes = 0;
     int seconds = 0;
-    
+
     int roundMinutes = 0;
     int roundSeconds = 0;
 
@@ -143,6 +144,7 @@
     int half = 0;
     int ten = 0;
     bool debug = false;
+    bool egg = false;
 
     Game game;
 
@@ -165,6 +167,9 @@
         timer.Elapsed += TimerOnElapsed;
         
         System.Console.WriteLine(gameOn);
+
+        bkgColor = "black";
+        txtColor = "white";
         
         CalculateRound();
     }
@@ -341,6 +346,12 @@
         StateHasChanged();
     }
 
+    private void ToggleDebug()
+    {
+        debug = !debug;
+        StateHasChanged();
+    }
+    
     //public class Phase
     //{
     //    public string Name { get; set; }
@@ -349,8 +360,6 @@
 
     public class Round
     {
-        public Dictionary<string, int> Phases { get; set; } = new Dictionary<string, int>();
-
         public Round()
         {
             Phases.Add("Team", 600); //600
@@ -358,13 +367,12 @@
             Phases.Add("Diplomacy", 600); //600
             Phases.Add("Cleanup", 300); //300
         }
+
+        public Dictionary<string, int> Phases { get; set; } = new Dictionary<string, int>();
     }
 
     public class Game
     {
-        //public int NumOfRounds { get; set; }
-        public List<Round> Rounds { get; } = new List<Round>();
-
         public Game(int numOfRounds)
         {
             System.Console.WriteLine($"numOfRounds: {numOfRounds}");
@@ -375,11 +383,13 @@
             }
             System.Console.WriteLine($"Ctor Rounds.Count: {Rounds.Count}");
         }
+
+    //public int NumOfRounds { get; set; }
+        public List<Round> Rounds { get; } = new List<Round>();
     }
 
     //public enum PhaseName
     //{
     //    Team, Action, Diplomacy, Cleanup
     //}
-
 }
