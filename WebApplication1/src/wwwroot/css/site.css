@@ -1,5 +1,5 @@
 ﻿@import url('open-iconic/font/css/open-iconic-bootstrap.min.css');
-@import url('https://fonts.googleapis.com/css?family=Orbitron|Tomorrow&display=swap');
+@import url('https://fonts.googleapis.com/css?family=Orbitron|Tomorrow|Metamorphous|Almendra+SC|Almendra+Display|Cardo|MedievalSharp&display=swap');
 
 body {
     margin: 0;
@@ -15,21 +15,30 @@ body {
 
 .time-to {
     text-align: center;    
-    font-family: 'Orbitron', sans-serif;
+    font-family: 'Cardo', sans-serif;
     color: white;
     font-size: 35px;
     letter-spacing: 2px;
 }
 .time{
-    font-family: 'Tomorrow', sans-serif;
+    font-family: 'Almendra SC', sans-serif;
     text-align: center;        
     color: white;
     font-size: 35px;
     letter-spacing: 2px;
 }
+.title {
+    text-align: center;
+    font-family: 'MedievalSharp', sans-serif;
+    color: white;    
+    font-size: 200px;
+    letter-spacing: 2px;
+}
 
 .button{
-    font-family: 'Orbitron', sans-serif;
+    font-family: 'Metamorphous', sans-serif;
+
+/usr/local/bin/dotnet
 }
 
 /*.time-to span {
